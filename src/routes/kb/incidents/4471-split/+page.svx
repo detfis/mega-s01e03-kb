@@ -2,7 +2,7 @@
 layout: runbook
 title: '#4471 · two date bugs merged under one subject'
 owner: support desk
-status: known
+status: resolved
 reviewed: 2026-11-01
 signature: v1.eyJzdWIiOiI3MDEiLCJhdWQiOiJjaGFsbGVuZ2U6d2hhdC1pdC1zaG93cyIsImlhdCI6MTc5MzU1MTYzMCwiZXhwIjoxNzkzNjM4MDMwfQ.MKdmRYJk2RfgFt4ipsWsmkF41M2PJkZUwqViwLQcVD4
 ---
@@ -14,21 +14,26 @@ signature: v1.eyJzdWIiOiI3MDEiLCJhdWQiOiJjaGFsbGVuZ2U6d2hhdC1pdC1zaG93cyIsImlhdC
   import RenderStamp from '#lib/kb/RenderStamp.svelte';
 </script>
 
-Ticket `#4471` was marked as a single known issue because [triage deduplication](/kb/triage/dedupe) merges incoming reports on subject line alone ([decision 0001](/kb/decisions/0001-dedupe-by-subject)). Grouping the deduplicated export by tenant locale and booking form channel (`#lib/kb/causes` and `#lib/kb/locales`) shows two separate problems inside `#4471`, now split into their own tickets.
+Ticket `#4471` was marked as a single known issue because [triage deduplication](/kb/triage/dedupe) merges incoming reports on subject line alone ([decision 0001](/kb/decisions/0001-dedupe-by-subject)). Grouping the deduplicated export by tenant locale and booking form channel (`#lib/kb/causes` and `#lib/kb/locales`) shows two separate problems inside `#4471`, tracked in their own tickets.
 
 <Callout kind="warn">
-Two distinct bugs were merged into <code>#4471</code>: <code>parser</code> (tracked in <a href="/issues/1">#1</a>) and <code>hint</code> (tracked in <a href="/issues/2">#2</a>). Fixing only the shared date parser leaves <code>booking-v3</code> form bookings broken.
+Two distinct bugs were merged into <code>#4471</code>: <code>parser</code> (tracked in <a href="https://github.com/detfis/mega-s01e03-kb/issues/1">#1</a>) and <code>hint</code> (tracked in <a href="https://github.com/detfis/mega-s01e03-kb/issues/2">#2</a>).
 </Callout>
 
 ## Problems found in #4471
 
-- **`parser` ([ticket #1](/issues/1)):** The shared date parser reads every date month-first (`MM/DD`), while every tenant in the directory uses a day-first locale (`DD/MM`). Dates sent through `booking-v2` (`app`, `email`, `form`) or through `booking-v3` (`app`, `email`) come out with day and month swapped. Reports listed in `desk-notes.json` (`oneDayMove`) that read as a one-day move are counted where they are filed under `parser` by tenant and footnoted below the table.
-- **`hint` ([ticket #2](/issues/2)):** `booking-v3` prints `MM/DD/YYYY` under its date field, whereas `booking-v2` prints `DD/MM/YYYY`. When customers of day-first tenants on `booking-v3` (`alder.physio`, `copper.studio`, `pale.harbour`) book through the `form` channel, they type the month first as the hint instructs, and the form reads the input the tenant's way (day-first).
+- **`parser` ([ticket #1](https://github.com/detfis/mega-s01e03-kb/issues/1)):** The shared date parser reads every date month-first (`MM/DD`), while every tenant in the directory uses a day-first locale (`DD/MM`). Dates sent through `booking-v2` (`app`, `email`, `form`) or through `booking-v3` (`app`, `email`) come out with day and month swapped. Reports listed in `desk-notes.json` (`oneDayMove`) that read as a one-day move are counted where they are filed under `parser` by tenant and footnoted below the table.
+- **`hint` ([ticket #2](https://github.com/detfis/mega-s01e03-kb/issues/2)):** `booking-v3` prints `MM/DD/YYYY` under its date field, whereas `booking-v2` prints `DD/MM/YYYY`. When customers of day-first tenants on `booking-v3` (`alder.physio`, `copper.studio`, `pale.harbour`) book through the `form` channel, they type the month first as the hint instructs, and the form reads the input the tenant's way (day-first).
+
+## Resolution (`#4471 · closed 05 oct`)
+
+- **`parser` ([ticket #1](https://github.com/detfis/mega-s01e03-kb/issues/1)) — `fixed`:** `fix(dates): parse dd/mm for eu locales` (closed as completed).
+- **`hint` ([ticket #2](https://github.com/detfis/mega-s01e03-kb/issues/2)) — `won't fix`:** `booking-v3 form retired` (closed as not planned).
 
 ## Why intake tags and subject merging hid the second bug
 
-1. **Subject-only deduplication:** Under [decision 0001](/kb/decisions/0001-dedupe-by-subject), reports with matching normalized subjects merge automatically without reading the body or checking the tenant's booking form.
-2. **Browser-locale intake guesses:** `meta.intakeTag` is guessed at intake from `meta.browserLocale` (`en-US` browsers get tagged `hint`; European browser locales get tagged `parser`). The real cause depends on the tenant's locale and booking form plus the report channel (`#lib/kb/causes`).
+- **Subject-only deduplication:** Under [decision 0001](/kb/decisions/0001-dedupe-by-subject), reports with matching normalized subjects merge automatically without reading the body or checking the tenant's booking form.
+- **Browser-locale intake guesses:** `meta.intakeTag` is guessed at intake from `meta.browserLocale` (`en-US` browsers get tagged `hint`; European browser locales get tagged `parser`). The real cause depends on the tenant's locale and booking form plus the report channel (`#lib/kb/causes`).
 
 ## What was merged
 
